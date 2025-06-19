@@ -10,5 +10,6 @@ export default () => {
     server: {
       https: true,
     },
+    base: "/r3f-3d-video-player/",
   })
 }
