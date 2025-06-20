@@ -13,7 +13,7 @@ const store = createXRStore({
   foveation: 0,
   layers: true,
   domOverlay: false,
-  emulate: { inject: true },
+  // emulate: { inject: true },
 })
 
 export function App() {
