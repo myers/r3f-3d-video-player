@@ -4,7 +4,7 @@ import {
   type ContainerProperties,
 } from "@react-three/uikit"
 import { colors } from "@react-three/uikit-default"
-import React, {
+import {
   type ReactNode,
   type RefAttributes,
   forwardRef,
@@ -13,11 +13,16 @@ import React, {
   useRef,
   useState,
 } from "react"
-import { type EventHandlers, type ThreeEvent } from "@react-three/fiber"
+import {
+  type EventHandlers,
+  type ThreeEvent,
+  useFrame,
+} from "@react-three/fiber"
 import { Vector3 } from "three"
 import { Signal, computed } from "@preact/signals-core"
 
 const vectorHelper = new Vector3()
+const MS_PER_SECOND = 1000
 
 export type VideoSliderProperties = {
   video?: HTMLVideoElement
@@ -25,8 +30,6 @@ export type VideoSliderProperties = {
   value?: Signal<number> | number
   defaultValue?: number
   onValueChange?(value: number): void
-  min?: Signal<number> | number
-  max?: Signal<number> | number
   step?: number
 } & Omit<ContainerProperties, "children">
 
@@ -35,26 +38,34 @@ export const VideoSlider: (
 ) => ReactNode = forwardRef(
   (
     {
+      video,
       disabled = false,
       value: providedValue,
       defaultValue,
       onValueChange,
-      min = 0,
-      max = 100,
       step = 1,
       ...props
     },
     ref,
   ) => {
     const [uncontrolled, setUncontrolled] = useState(defaultValue)
-    const value = providedValue ?? uncontrolled ?? 50
+    const value = providedValue ?? uncontrolled ?? 0
+
+    useFrame(() => {
+      if (!video || providedValue !== undefined || video.paused) return
+      setUncontrolled(video.currentTime * MS_PER_SECOND)
+    })
+
     const percentage = useMemo(
       () =>
         computed(() => {
-          const range = readReactive(max) - readReactive(min)
-          return `${(100 * readReactive(value)) / range}%` as const
+          if (!video || !video.duration) return "0%"
+          const currentValue = readReactive(value)
+          if (currentValue === undefined) return "0%"
+          const duration = video.duration * MS_PER_SECOND
+          return `${Math.min(100, Math.max(0, (100 * currentValue) / duration))}%` as const
         }),
-      [min, max, value],
+      [video, value],
     )
     const internalRef = useRef<ContainerRef>(null)
     const onChange = useRef(onValueChange)
@@ -63,22 +74,18 @@ export const VideoSlider: (
     const handler = useMemo(() => {
       let downPointerId: number | undefined
       function setValue(e: ThreeEvent<PointerEvent>) {
-        if (internalRef.current == null) {
+        if (internalRef.current == null || !video || !video.duration) {
           return
         }
         vectorHelper.copy(e.point)
         internalRef.current.interactionPanel.worldToLocal(vectorHelper)
-        const minValue = readReactive(min)
-        const maxValue = readReactive(max)
+        const duration = video.duration * MS_PER_SECOND
         const newValue = Math.min(
           Math.max(
-            Math.round(
-              ((vectorHelper.x + 0.5) * (maxValue - minValue) + minValue) /
-                step,
-            ) * step,
-            minValue,
+            Math.round(((vectorHelper.x + 0.5) * duration) / step) * step,
+            0,
           ),
-          maxValue,
+          duration,
         )
         if (!hasProvidedValue) {
           setUncontrolled(newValue)
@@ -109,7 +116,7 @@ export const VideoSlider: (
           e.stopPropagation()
         },
       } satisfies EventHandlers
-    }, [max, min, hasProvidedValue, step])
+    }, [video, hasProvidedValue, step])
     useImperativeHandle(ref, () => internalRef.current!)
     return (
       <Container
