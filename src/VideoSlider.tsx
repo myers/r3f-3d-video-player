@@ -50,6 +50,7 @@ export const VideoSlider: (
   ) => {
     const [uncontrolled, setUncontrolled] = useState(defaultValue)
     const value = providedValue ?? uncontrolled ?? 0
+    const wasPlayingRef = useRef(false)
 
     useFrame(() => {
       if (!video || providedValue !== undefined || video.paused) return
@@ -91,13 +92,18 @@ export const VideoSlider: (
           setUncontrolled(newValue)
         }
         onChange.current?.(newValue)
+
+        // Update video time
+        video.currentTime = newValue / MS_PER_SECOND
         e.stopPropagation()
       }
       return {
         onPointerDown(e) {
-          if (downPointerId != null) {
+          if (downPointerId != null || !video) {
             return
           }
+          wasPlayingRef.current = !video.paused
+          video.pause()
           downPointerId = e.pointerId
           setValue(e)
           ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
@@ -109,10 +115,13 @@ export const VideoSlider: (
           setValue(e)
         },
         onPointerUp(e) {
-          if (downPointerId == null) {
+          if (downPointerId == null || !video) {
             return
           }
           downPointerId = undefined
+          if (wasPlayingRef.current) {
+            video.play()
+          }
           e.stopPropagation()
         },
       } satisfies EventHandlers
