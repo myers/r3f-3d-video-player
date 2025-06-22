@@ -22,7 +22,7 @@ export const UIKitDecorator = (Story: StoryComponent) => (
   <div style={wrapperStyle}>
     <Canvas style={canvasStyle}>
       <Defaults>
-        <Fullscreen backgroundColor="grey">
+        <Fullscreen backgroundColor="black">
           <Story />
         </Fullscreen>
       </Defaults>

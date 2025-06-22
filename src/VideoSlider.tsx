@@ -24,50 +24,84 @@ import { Signal, computed } from "@preact/signals-core"
 const vectorHelper = new Vector3()
 const MS_PER_SECOND = 1000
 
+type TimeRanges = {
+  length: number
+  start(index: number): number
+  end(index: number): number
+}
+
+type MediaController = {
+  currentTime: number
+  duration: number
+  paused: boolean
+  buffered: TimeRanges
+  play(): Promise<void>
+  pause(): void
+}
+
+type BufferedRange = {
+  start: `${number}%`
+  width: `${number}%`
+}
+
 export type VideoSliderProperties = {
-  video?: HTMLVideoElement
-  disabled?: boolean
+  media?: MediaController
   value?: Signal<number> | number
-  defaultValue?: number
   onValueChange?(value: number): void
-  step?: number
 } & Omit<ContainerProperties, "children">
 
 export const VideoSlider: (
   props: VideoSliderProperties & RefAttributes<ContainerRef>,
 ) => ReactNode = forwardRef(
-  (
-    {
-      video,
-      disabled = false,
-      value: providedValue,
-      defaultValue,
-      onValueChange,
-      step = 1,
-      ...props
-    },
-    ref,
-  ) => {
-    const [uncontrolled, setUncontrolled] = useState(defaultValue)
+  ({ media, value: providedValue, onValueChange, ...props }, ref) => {
+    const [uncontrolled, setUncontrolled] = useState(0)
+    const [bufferedRanges, setBufferedRanges] = useState<BufferedRange[]>([])
     const value = providedValue ?? uncontrolled ?? 0
     const wasPlayingRef = useRef(false)
 
     useFrame(() => {
-      if (!video || providedValue !== undefined || video.paused) return
-      setUncontrolled(video.currentTime * MS_PER_SECOND)
+      if (!media || !media.duration) return
+
+      // Update current time if media is playing and not controlled externally
+      if (!providedValue && !media.paused) {
+        setUncontrolled(media.currentTime * MS_PER_SECOND)
+      }
+
+      // Update buffered ranges
+      const currentTime = media.currentTime
+      const ranges: BufferedRange[] = []
+
+      for (let i = 0; i < media.buffered.length; i++) {
+        const start = media.buffered.start(i)
+        const end = media.buffered.end(i)
+
+        // Only include ranges that extend beyond current playback position
+        if (end > currentTime) {
+          const rangeStart = Math.max(start, currentTime)
+          const startPercent = (rangeStart / media.duration) * 100
+          const widthPercent = ((end - rangeStart) / media.duration) * 100
+
+          ranges.push({
+            start: `${Math.min(100, Math.max(0, startPercent))}%` as const,
+            width: `${Math.min(100, Math.max(0, widthPercent))}%` as const,
+          })
+        }
+      }
+      setBufferedRanges(ranges)
     })
 
     const percentage = useMemo(
       () =>
         computed(() => {
-          if (!video || !video.duration) return "0%"
+          if (!media || !media.duration) return "0%"
           const currentValue = readReactive(value)
           if (currentValue === undefined) return "0%"
-          const duration = video.duration * MS_PER_SECOND
+          const duration = media.duration * MS_PER_SECOND
           return `${Math.min(100, Math.max(0, (100 * currentValue) / duration))}%` as const
         }),
-      [video, value],
+      [media, value],
     )
+
     const internalRef = useRef<ContainerRef>(null)
     const onChange = useRef(onValueChange)
     onChange.current = onValueChange
@@ -75,17 +109,14 @@ export const VideoSlider: (
     const handler = useMemo(() => {
       let downPointerId: number | undefined
       function setValue(e: ThreeEvent<PointerEvent>) {
-        if (internalRef.current == null || !video || !video.duration) {
+        if (internalRef.current == null || !media || !media.duration) {
           return
         }
         vectorHelper.copy(e.point)
         internalRef.current.interactionPanel.worldToLocal(vectorHelper)
-        const duration = video.duration * MS_PER_SECOND
+        const duration = media.duration * MS_PER_SECOND
         const newValue = Math.min(
-          Math.max(
-            Math.round(((vectorHelper.x + 0.5) * duration) / step) * step,
-            0,
-          ),
+          Math.max((vectorHelper.x + 0.5) * duration, 0),
           duration,
         )
         if (!hasProvidedValue) {
@@ -93,17 +124,17 @@ export const VideoSlider: (
         }
         onChange.current?.(newValue)
 
-        // Update video time
-        video.currentTime = newValue / MS_PER_SECOND
+        // Update media time
+        media.currentTime = newValue / MS_PER_SECOND
         e.stopPropagation()
       }
       return {
         onPointerDown(e) {
-          if (downPointerId != null || !video) {
+          if (downPointerId != null || !media) {
             return
           }
-          wasPlayingRef.current = !video.paused
-          video.pause()
+          wasPlayingRef.current = !media.paused
+          media.pause()
           downPointerId = e.pointerId
           setValue(e)
           ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
@@ -115,21 +146,21 @@ export const VideoSlider: (
           setValue(e)
         },
         onPointerUp(e) {
-          if (downPointerId == null || !video) {
+          if (downPointerId == null || !media) {
             return
           }
           downPointerId = undefined
           if (wasPlayingRef.current) {
-            video.play()
+            media.play()
           }
           e.stopPropagation()
         },
       } satisfies EventHandlers
-    }, [video, hasProvidedValue, step])
+    }, [media, hasProvidedValue])
     useImperativeHandle(ref, () => internalRef.current!)
     return (
       <Container
-        {...(disabled ? {} : handler)}
+        {...handler}
         positionType="relative"
         flexDirection="column"
         height={8}
@@ -147,6 +178,17 @@ export const VideoSlider: (
           borderRadius={1000}
           backgroundColor={colors.secondary}
         >
+          {bufferedRanges.map((range, index) => (
+            <Container
+              key={index}
+              height="100%"
+              width={range.width}
+              positionType="absolute"
+              positionLeft={range.start}
+              borderRadius={1000}
+              backgroundColor="#666666"
+            />
+          ))}
           <Container
             height="100%"
             width={percentage}
@@ -158,13 +200,11 @@ export const VideoSlider: (
           zIndexOffset={{ minor: 100 }}
           positionType="absolute"
           positionLeft={percentage}
-          transformTranslateX={-10}
-          transformTranslateY={-6}
+          transformTranslateX={-7}
+          transformTranslateY={-3}
           cursor="pointer"
-          borderOpacity={disabled ? 0.5 : undefined}
-          backgroundOpacity={disabled ? 0.5 : undefined}
-          height={20}
-          width={20}
+          height={14}
+          width={14}
           borderWidth={2}
           borderRadius={1000}
           borderColor={colors.primary}
