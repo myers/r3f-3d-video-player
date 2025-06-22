@@ -97,14 +97,16 @@ export function EquirectPlayer({
   })
 
   return (
-    <XRLayer
-      src={video}
-      layout={layout}
-      shape="equirect"
-      centralHorizontalAngle={(Math.PI * videoAngle) / 180}
-      upperVerticalAngle={Math.PI / 2.0}
-      lowerVerticalAngle={-Math.PI / 2.0}
-      scale={100}
-    />
+    <group>
+      <XRLayer
+        src={video}
+        layout={layout}
+        shape="equirect"
+        centralHorizontalAngle={(Math.PI * videoAngle) / 180}
+        upperVerticalAngle={Math.PI / 2.0}
+        lowerVerticalAngle={-Math.PI / 2.0}
+        scale={100}
+      />
+    </group>
   )
 }

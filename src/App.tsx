@@ -27,7 +27,14 @@ export function App() {
     <>
       <SplashScreen store={store}>
         <h1>VR Video Player</h1>
-        <p>Tested on the Quest Browser. </p>
+        <p>
+          This is a reimplementation of the{" "}
+          <a href="https://github.com/immersive-web/webxr-samples/blob/main/layers-samples/eqrt-video.html">
+            XR Layer Eqrt video demo
+          </a>
+          , but with React Three Fiber and React XR.
+        </p>
+        <p>Tested on the Quest Browser.</p>
         <ul>
           <li>A button plays and pauses the video</li>
           <li>
