@@ -3,7 +3,7 @@ import { VideoSlider } from "../VideoSlider"
 import { useMemo, useState, useEffect } from "react"
 import { Container, Text, Video } from "@react-three/uikit"
 import { Button } from "@react-three/uikit-default"
-import { UIKitDecorator } from "../decorators/UIKitDecorator"
+import { FullscreenUIKitDecorator } from "../decorators/FullscreenUIKitDecorator"
 
 const Header = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -34,7 +34,7 @@ const meta = {
   parameters: {
     layout: "centered",
   },
-  decorators: [UIKitDecorator],
+  decorators: [FullscreenUIKitDecorator],
   tags: ["autodocs"],
 } satisfies Meta<typeof VideoSlider>
 

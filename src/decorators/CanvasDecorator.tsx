@@ -1,6 +1,6 @@
 import { Canvas } from "@react-three/fiber"
 import { Defaults } from "@react-three/uikit-default"
-import { Fullscreen } from "@react-three/uikit"
+import { Environment } from "@react-three/drei"
 import type { ReactNode } from "react"
 
 type StoryComponent = () => ReactNode
@@ -18,13 +18,15 @@ const canvasStyle = {
   height: "100%",
 }
 
-export const UIKitDecorator = (Story: StoryComponent) => (
+export const CanvasDecorator = (Story: StoryComponent) => (
   <div style={wrapperStyle}>
     <Canvas style={canvasStyle}>
+      <ambientLight intensity={0.1} />
+      <directionalLight position={[0, 0, 5]} color="red" />
+
+      <Environment preset="sunset" background backgroundBlurriness={0.4} />
       <Defaults>
-        <Fullscreen backgroundColor="black">
-          <Story />
-        </Fullscreen>
+        <Story />
       </Defaults>
     </Canvas>
   </div>
