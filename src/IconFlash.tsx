@@ -1,46 +1,43 @@
 import { Root, type RootRef } from "@react-three/uikit"
 import { Pause } from "@react-three/uikit-lucide"
-import { useCallback, useRef, useMemo } from "react"
-import { useSpring } from "@react-spring/web"
+import { useRef, useMemo, useEffect } from "react"
+import { useSpring, to } from "@react-spring/web"
 import { signal } from "@preact/signals-core"
 
-export const IconFlash = () => {
+interface IconFlashProps {
+  disabled?: boolean
+}
+
+export const IconFlash = ({ disabled = false }: IconFlashProps) => {
   const rootRef = useRef<RootRef>(null)
   const opacity = useMemo(() => signal(1), [])
 
-  const { scale } = useSpring({
-    from: { scale: 1.5 },
-    to: { scale: 1.5 },
-    config: {
-      duration: 250,
-    },
-    onChange: ({ value: { scale } }) => {
-      if (!rootRef.current) return
-      rootRef.current.setStyle({ transformScale: scale })
-    },
-  })
-
   const { progress } = useSpring({
     from: { progress: 0 },
-    to: { progress: 0 },
+    to: { progress: 1 },
     config: {
-      duration: 250,
+      duration: 500,
     },
     onChange: ({ value: { progress } }) => {
       if (!rootRef.current) return
 
-      let currentOpacity
-      if (progress <= 0.4) {
-        currentOpacity = 1 - (progress / 0.4) * 0.1
-      } else {
-        const finalProgress = (progress - 0.4) / 0.6
-        currentOpacity = 0.9 * (1 - finalProgress)
-      }
+      // Interpolate scale: 1.5 -> 3
+      const scale = 2 + (3 - 1.5) * progress
+
+      // Custom opacity curve:
+      // 0-40%: stay mostly opaque (1.0 -> 0.9)
+      // 40-100%: fade to 0
+      const currentOpacity = to([progress], (p) => {
+        if (p <= 0.4) return 1 - (p / 0.4) * 0.1
+        return 0.9 * (1 - (p - 0.4) / 0.6)
+      }).get()
 
       opacity.value = currentOpacity
       rootRef.current.setStyle({
+        transformScale: scale,
         backgroundOpacity: currentOpacity,
       })
+      console.log("opacity.value", opacity.value)
     },
     onRest: () => {
       if (!rootRef.current) return
@@ -51,8 +48,8 @@ export const IconFlash = () => {
     },
   })
 
-  const handleClick = useCallback(() => {
-    if (!rootRef.current) return
+  useEffect(() => {
+    if (disabled || !rootRef.current) return
 
     opacity.value = 1
     rootRef.current.setStyle({
@@ -60,16 +57,8 @@ export const IconFlash = () => {
       backgroundOpacity: 1,
     })
 
-    scale.start({
-      from: 1.5,
-      to: 3,
-    })
-
-    progress.start({
-      from: 0,
-      to: 1,
-    })
-  }, [scale, progress])
+    progress.start()
+  }, [progress, disabled])
 
   return (
     <Root
@@ -77,14 +66,12 @@ export const IconFlash = () => {
       borderRadius={50}
       backgroundColor="black"
       padding={10}
-      onClick={handleClick}
-      cursor="pointer"
       justifyContent="center"
       alignItems="center"
       transformScale={1.5}
       backgroundOpacity={1}
     >
-      <Pause opacity={opacity} />
+      <Pause opacity={opacity} color="white" />
     </Root>
   )
 }
