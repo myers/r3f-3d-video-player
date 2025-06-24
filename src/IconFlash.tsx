@@ -23,38 +23,26 @@ export const IconFlash = ({
   name = "pause",
 }: IconFlashProps) => {
   const rootRef = useRef<RootRef>(null)
-  const opacity = useMemo(() => signal(1), [])
+  const iconOpacity = useMemo(() => signal(1), [])
 
-  const { progress } = useSpring({
-    from: { progress: 0 },
-    to: { progress: 1 },
+  const { opacity, scale } = useSpring({
+    from: { opacity: 1, scale: 1.5 },
+    to: { opacity: 0, scale: 3 },
     config: {
       duration: 250,
     },
-    onChange: ({ value: { progress } }) => {
+    onChange: ({ value: { scale, opacity } }) => {
       if (!rootRef.current) return
 
-      // Interpolate scale: 1.5 -> 3
-      const scale = 1.5 + (3 - 1.5) * progress
-
-      // Custom opacity curve:
-      // 0-40%: stay mostly opaque (1.0 -> 0.9)
-      // 40-100%: fade to 0
-      const currentOpacity = to([progress], (p) => {
-        if (p <= 0.4) return 1 - (p / 0.4) * 0.1
-        return 0.9 * (1 - (p - 0.4) / 0.6)
-      }).get()
-
-      opacity.value = currentOpacity
+      iconOpacity.value = opacity
       rootRef.current.setStyle({
         transformScale: scale,
-        backgroundOpacity: currentOpacity,
+        backgroundOpacity: opacity,
       })
-      console.log("opacity.value", opacity.value)
     },
     onRest: () => {
       if (!rootRef.current) return
-      opacity.value = 0
+      iconOpacity.value = 0
       rootRef.current.setStyle({
         backgroundOpacity: 0,
       })
@@ -64,14 +52,9 @@ export const IconFlash = ({
   useEffect(() => {
     if (disabled || !rootRef.current) return
 
-    opacity.value = 1
-    rootRef.current.setStyle({
-      transformScale: 1.5,
-      backgroundOpacity: 1,
-    })
-
-    progress.start()
-  }, [progress, disabled])
+    // opacity.start()
+    // scale.start()
+  }, [opacity, scale, disabled])
 
   const Icon = ICONS[name]
   return (
@@ -85,7 +68,7 @@ export const IconFlash = ({
       transformScale={1.5}
       backgroundOpacity={1}
     >
-      <Icon opacity={opacity} color="white" />
+      <Icon opacity={iconOpacity} color="white" />
     </Root>
   )
 }
