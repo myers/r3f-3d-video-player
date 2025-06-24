@@ -1,14 +1,27 @@
 import { Root, type RootRef } from "@react-three/uikit"
-import { Pause } from "@react-three/uikit-lucide"
+import { Pause, Play, FastForward, Rewind } from "@react-three/uikit-lucide"
 import { useRef, useMemo, useEffect } from "react"
 import { useSpring, to } from "@react-spring/web"
 import { signal } from "@preact/signals-core"
 
+const ICONS = {
+  pause: Pause,
+  play: Play,
+  "fast-forward": FastForward,
+  rewind: Rewind,
+} as const
+
+type IconType = keyof typeof ICONS
+
 interface IconFlashProps {
   disabled?: boolean
+  name?: IconType
 }
 
-export const IconFlash = ({ disabled = false }: IconFlashProps) => {
+export const IconFlash = ({
+  disabled = false,
+  name = "pause",
+}: IconFlashProps) => {
   const rootRef = useRef<RootRef>(null)
   const opacity = useMemo(() => signal(1), [])
 
@@ -16,13 +29,13 @@ export const IconFlash = ({ disabled = false }: IconFlashProps) => {
     from: { progress: 0 },
     to: { progress: 1 },
     config: {
-      duration: 500,
+      duration: 250,
     },
     onChange: ({ value: { progress } }) => {
       if (!rootRef.current) return
 
       // Interpolate scale: 1.5 -> 3
-      const scale = 2 + (3 - 1.5) * progress
+      const scale = 1.5 + (3 - 1.5) * progress
 
       // Custom opacity curve:
       // 0-40%: stay mostly opaque (1.0 -> 0.9)
@@ -60,6 +73,7 @@ export const IconFlash = ({ disabled = false }: IconFlashProps) => {
     progress.start()
   }, [progress, disabled])
 
+  const Icon = ICONS[name]
   return (
     <Root
       ref={rootRef}
@@ -71,7 +85,7 @@ export const IconFlash = ({ disabled = false }: IconFlashProps) => {
       transformScale={1.5}
       backgroundOpacity={1}
     >
-      <Pause opacity={opacity} color="white" />
+      <Icon opacity={opacity} color="white" />
     </Root>
   )
 }
