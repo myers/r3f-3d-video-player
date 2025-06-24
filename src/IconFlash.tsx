@@ -1,6 +1,6 @@
 import { Root, type RootRef } from "@react-three/uikit"
 import { Pause, Play, FastForward, Rewind } from "@react-three/uikit-lucide"
-import { useRef, useMemo, useEffect } from "react"
+import { useRef, useMemo } from "react"
 import { useSpring } from "@react-spring/web"
 import { signal } from "@preact/signals-core"
 
