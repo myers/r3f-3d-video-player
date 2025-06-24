@@ -32,7 +32,7 @@ export const VolumeControl: (
 
     const handleVolumeChange = () => {
       setMuted(video.muted)
-      volumeSignal.value = video.volume
+      volumeSignal.value = video.muted ? 0 : video.volume
     }
 
     video.addEventListener("volumechange", handleVolumeChange)
@@ -45,17 +45,21 @@ export const VolumeControl: (
   const toggleMute = () => {
     if (!video) return
     video.muted = !video.muted
+    volumeSignal.value = video.muted ? 0 : video.volume
     setMuted(!muted)
   }
 
   const handleVolumeChange = (value: number) => {
     if (!video) return
-    video.volume = value
-    volumeSignal.value = value
     if (value > 0) {
       video.muted = false
       setMuted(false)
+    } else if (value === 0) {
+      video.muted = true
+      setMuted(true)
     }
+    video.volume = value
+    volumeSignal.value = value
   }
 
   return (
@@ -68,7 +72,6 @@ export const VolumeControl: (
       ref={internalRef}
     >
       <Container
-        onClick={toggleMute}
         cursor="pointer"
         width={24}
         height={24}
@@ -76,9 +79,9 @@ export const VolumeControl: (
         alignItems="center"
       >
         {muted ? (
-          <VolumeX color="white" width={16} height={16} />
+          <VolumeX color="white" width={16} height={16} onClick={toggleMute} />
         ) : (
-          <Volume2 color="white" width={16} height={16} />
+          <Volume2 color="white" width={16} height={16} onClick={toggleMute} />
         )}
       </Container>
       <Slider
