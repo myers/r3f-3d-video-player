@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { Canvas } from "@react-three/fiber"
-import { IconFlash } from "../IconFlash"
+import { IconFlash, type IconType } from "../IconFlash"
 import { useState } from "react"
 
 const meta = {
@@ -14,8 +14,11 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
+const ICON_SEQUENCE: IconType[] = ["play", "pause", "fast_forward", "rewind"]
+
 const AnimatedStory = () => {
   const [key, setKey] = useState(0)
+  const [iconIndex, setIconIndex] = useState(0)
 
   return (
     <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
@@ -25,10 +28,13 @@ const AnimatedStory = () => {
         camera={{ position: [0, 0, 10] }}
       >
         <color attach="background" args={["#808080"]} />
-        <IconFlash key={key} />
+        <IconFlash key={key} name={ICON_SEQUENCE[iconIndex]} />
       </Canvas>
       <button
-        onClick={() => setKey((k) => k + 1)}
+        onClick={() => {
+          setIconIndex((i) => (i + 1) % ICON_SEQUENCE.length)
+          setKey((k) => k + 1)
+        }}
         style={{
           position: "relative",
           zIndex: 1000,
@@ -41,7 +47,7 @@ const AnimatedStory = () => {
           cursor: "pointer",
         }}
       >
-        Replay Animation
+        Next Icon: {ICON_SEQUENCE[(iconIndex + 1) % ICON_SEQUENCE.length]}
       </button>
     </div>
   )

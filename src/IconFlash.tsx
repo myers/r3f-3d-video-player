@@ -1,17 +1,17 @@
 import { Root, type RootRef } from "@react-three/uikit"
 import { Pause, Play, FastForward, Rewind } from "@react-three/uikit-lucide"
 import { useRef, useMemo, useEffect } from "react"
-import { useSpring, to } from "@react-spring/web"
+import { useSpring } from "@react-spring/web"
 import { signal } from "@preact/signals-core"
 
 const ICONS = {
   pause: Pause,
   play: Play,
-  "fast-forward": FastForward,
+  fast_forward: FastForward,
   rewind: Rewind,
 } as const
 
-type IconType = keyof typeof ICONS
+export type IconType = keyof typeof ICONS
 
 interface IconFlashProps {
   disabled?: boolean
@@ -20,16 +20,28 @@ interface IconFlashProps {
 
 export const IconFlash = ({
   disabled = false,
-  name = "pause",
+  name = "play",
 }: IconFlashProps) => {
   const rootRef = useRef<RootRef>(null)
   const iconOpacity = useMemo(() => signal(1), [])
 
-  const { opacity, scale } = useSpring({
-    from: { opacity: 1, scale: 1.5 },
-    to: { opacity: 0, scale: 3 },
-    config: {
-      duration: 250,
+  const initalScale = 3
+  useSpring({
+    pause: disabled,
+    from: { opacity: 1, scale: initalScale },
+    to: { opacity: 0, scale: initalScale * 2 },
+    config: (key) => {
+      if (key === "opacity") {
+        return {
+          tension: 500,
+          friction: 150,
+        }
+      } else {
+        return {
+          tension: 120,
+          friction: 10,
+        }
+      }
     },
     onChange: ({ value: { scale, opacity } }) => {
       if (!rootRef.current) return
@@ -40,22 +52,9 @@ export const IconFlash = ({
         backgroundOpacity: opacity,
       })
     },
-    onRest: () => {
-      if (!rootRef.current) return
-      iconOpacity.value = 0
-      rootRef.current.setStyle({
-        backgroundOpacity: 0,
-      })
-    },
   })
 
-  useEffect(() => {
-    if (disabled || !rootRef.current) return
-
-    // opacity.start()
-    // scale.start()
-  }, [opacity, scale, disabled])
-
+  console.log("iconOpacity1", iconOpacity.value)
   const Icon = ICONS[name]
   return (
     <Root
@@ -65,7 +64,7 @@ export const IconFlash = ({
       padding={10}
       justifyContent="center"
       alignItems="center"
-      transformScale={1.5}
+      transformScale={initalScale}
       backgroundOpacity={1}
     >
       <Icon opacity={iconOpacity} color="white" />
