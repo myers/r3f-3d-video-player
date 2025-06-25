@@ -3,13 +3,13 @@ import react from "@vitejs/plugin-react"
 import mkcert from "vite-plugin-mkcert"
 
 // https://vitejs.dev/config/
-export default () => {
-  return defineConfig({
-    clearScreen: false,
-    plugins: [react(), mkcert()],
-    server: {
-      https: true,
+export default defineConfig({
+  clearScreen: false,
+  plugins: [react(), mkcert()],
+  server: {
+    https: {
+      // Using mkcert to handle certificates
     },
-    base: "/r3f-3d-video-player/",
-  })
-}
+  },
+  base: "/r3f-3d-video-player/",
+})
