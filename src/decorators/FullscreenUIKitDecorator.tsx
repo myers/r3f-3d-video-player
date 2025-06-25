@@ -6,8 +6,8 @@ import type { ReactNode } from "react"
 type StoryComponent = () => ReactNode
 
 const wrapperStyle = {
-  width: "80vw",
-  height: "50vh",
+  width: "100vw",
+  height: "100vh",
   position: "relative" as const,
 }
 
@@ -22,7 +22,12 @@ export const FullscreenUIKitDecorator = (Story: StoryComponent) => (
   <div style={wrapperStyle}>
     <Canvas style={canvasStyle}>
       <Defaults>
-        <Fullscreen backgroundColor="black">
+        <Fullscreen
+          backgroundColor="black"
+          justifyContent="center"
+          alignItems="center"
+          flexDirection="column"
+        >
           <Story />
         </Fullscreen>
       </Defaults>

@@ -14,6 +14,28 @@ const Header = ({ children }: { children: React.ReactNode }) => {
 }
 
 const createMockMedia = (bufferedRanges: Array<[number, number]>) => {
+  const eventListeners: Record<string, Array<() => void>> = {}
+
+  const addEventListener = (event: string, callback: () => void) => {
+    if (!eventListeners[event]) {
+      eventListeners[event] = []
+    }
+    eventListeners[event].push(callback)
+  }
+
+  const removeEventListener = (event: string, callback: () => void) => {
+    if (!eventListeners[event]) return
+    eventListeners[event] = eventListeners[event].filter(
+      (cb) => cb !== callback,
+    )
+  }
+
+  const dispatchEvent = (event: string) => {
+    if (!eventListeners[event]) return true
+    eventListeners[event].forEach((callback) => callback())
+    return true
+  }
+
   return {
     currentTime: 0,
     duration: 100,
@@ -25,6 +47,9 @@ const createMockMedia = (bufferedRanges: Array<[number, number]>) => {
     },
     play: () => Promise.resolve(),
     pause: () => {},
+    addEventListener,
+    removeEventListener,
+    dispatchEvent,
   }
 }
 
@@ -32,10 +57,9 @@ const meta = {
   title: "Components/VideoSlider",
   component: VideoSlider,
   parameters: {
-    layout: "centered",
+    layout: "fullscreen",
   },
   decorators: [FullscreenUIKitDecorator],
-  tags: ["autodocs"],
 } satisfies Meta<typeof VideoSlider>
 
 export default meta
@@ -46,7 +70,7 @@ export const Default: Story = {
     const video = useMemo(() => {
       const vid = document.createElement("video")
       vid.src =
-        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sampleBunny.mp4"
       vid.crossOrigin = "anonymous"
       vid.load()
       return vid

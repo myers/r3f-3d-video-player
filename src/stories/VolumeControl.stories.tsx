@@ -16,10 +16,9 @@ const meta = {
   title: "Components/VolumeControl",
   component: VolumeControl,
   parameters: {
-    layout: "centered",
+    layout: "fullscreen",
   },
   decorators: [FullscreenUIKitDecorator],
-  tags: ["autodocs"],
 } satisfies Meta<typeof VolumeControl>
 
 export default meta

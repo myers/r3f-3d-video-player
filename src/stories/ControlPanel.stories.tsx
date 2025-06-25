@@ -8,10 +8,9 @@ const meta = {
   title: "Components/ControlPanel",
   component: ControlPanel,
   parameters: {
-    layout: "centered",
+    layout: "fullscreen",
   },
   decorators: [FullscreenUIKitDecorator],
-  tags: ["autodocs"],
 } satisfies Meta<typeof ControlPanel>
 
 export default meta
@@ -47,12 +46,6 @@ export const Default: Story = {
         </Container>
       </Container>
     )
-  },
-}
-
-export const NoVideo: Story = {
-  render: (props) => {
-    return <ControlPanel title="No Video Loaded" {...props} />
   },
 }
 
