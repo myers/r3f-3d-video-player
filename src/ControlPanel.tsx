@@ -1,8 +1,10 @@
 import { Container, Root, Text } from "@react-three/uikit"
 import { VideoSlider } from "./VideoSlider"
-import { useMemo } from "react"
+import { VolumeControl } from "./VolumeControl"
+import { useMemo, useState, useEffect } from "react"
 import { computed, signal } from "@preact/signals-core"
 import { useFrame } from "@react-three/fiber"
+import { Play, Pause, FastForward, Rewind } from "@react-three/uikit-lucide"
 
 export const ControlPanelRoot = () => {
   return (
@@ -33,6 +35,27 @@ export const ControlPanel = ({
 }) => {
   const timeSignal = useMemo(() => signal(0), [])
   const durationSignal = useMemo(() => signal(0), [])
+  const [paused, setPaused] = useState(true)
+
+  useEffect(() => {
+    if (!video) return
+
+    const handlePlay = () => setPaused(false)
+    const handlePause = () => setPaused(true)
+
+    // Set initial state
+    setPaused(video.paused)
+
+    // Add event listeners
+    video.addEventListener("play", handlePlay)
+    video.addEventListener("pause", handlePause)
+
+    // Cleanup
+    return () => {
+      video.removeEventListener("play", handlePlay)
+      video.removeEventListener("pause", handlePause)
+    }
+  }, [video])
 
   useFrame(() => {
     if (!video) return
@@ -50,16 +73,95 @@ export const ControlPanel = ({
     [durationSignal],
   )
 
+  const handlePlayPause = () => {
+    if (!video) return
+    if (video.paused) {
+      video.play()
+    } else {
+      video.pause()
+    }
+  }
+
+  const handleRewind = () => {
+    if (!video) return
+    video.currentTime = Math.max(0, video.currentTime - 10)
+  }
+
+  const handleFastForward = () => {
+    if (!video) return
+    video.currentTime = Math.min(video.duration, video.currentTime + 10)
+  }
+
   return (
     <Container
-      flexGrow={0}
-      margin={32}
+      flexGrow={1}
       backgroundColor="black"
-      padding={16}
-      gap={16}
       flexDirection="column"
-      width={500}
+      gap={10}
+      margin={15}
     >
+      {title && (
+        <Text fontSize={16} color="white" textAlign="center" fontWeight="bold">
+          {title}
+        </Text>
+      )}
+      <Container
+        flexDirection="row"
+        alignItems="center"
+        gap={16}
+        justifyContent="space-between"
+      >
+        {/* Left section - Volume control */}
+        <Container width="33%">
+          <VolumeControl video={video} />
+        </Container>
+
+        {/* Center section - Playback controls */}
+        <Container
+          flexDirection="row"
+          gap={16}
+          alignItems="center"
+          width="33%"
+          justifyContent="center"
+        >
+          <Container cursor="pointer">
+            <Rewind
+              color="white"
+              width={24}
+              height={24}
+              onClick={handleRewind}
+            />
+          </Container>
+          <Container cursor="pointer" onClick={handlePlayPause}>
+            {paused ? (
+              <Play
+                color="white"
+                width={48}
+                height={48}
+                onClick={handlePlayPause}
+              />
+            ) : (
+              <Pause
+                color="white"
+                width={48}
+                height={48}
+                onClick={handlePlayPause}
+              />
+            )}
+          </Container>
+          <Container cursor="pointer">
+            <FastForward
+              color="white"
+              width={24}
+              height={24}
+              onClick={handleFastForward}
+            />
+          </Container>
+        </Container>
+
+        {/* Right section - Empty space */}
+        <Container width="33%" />
+      </Container>
       <Container flexDirection="row" alignItems="center" gap={16}>
         <Text fontSize={14} color="white" flexGrow={0} width={50}>
           {timeText}
@@ -69,11 +171,6 @@ export const ControlPanel = ({
           {durationText}
         </Text>
       </Container>
-      {title && (
-        <Text fontSize={16} color="white" textAlign="center">
-          {title}
-        </Text>
-      )}
     </Container>
   )
 }

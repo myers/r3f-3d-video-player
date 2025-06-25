@@ -79,13 +79,13 @@ export const VolumeControl: (
         alignItems="center"
       >
         {muted ? (
-          <VolumeX color="white" width={16} height={16} onClick={toggleMute} />
+          <VolumeX color="white" width={24} height={24} onClick={toggleMute} />
         ) : (
-          <Volume2 color="white" width={16} height={16} onClick={toggleMute} />
+          <Volume2 color="white" width={24} height={24} onClick={toggleMute} />
         )}
       </Container>
       <Slider
-        width={100}
+        width={80}
         min={0}
         max={1}
         step={0.01}

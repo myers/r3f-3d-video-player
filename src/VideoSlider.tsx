@@ -12,6 +12,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useEffect,
 } from "react"
 import {
   type EventHandlers,
@@ -58,6 +59,25 @@ export const VideoSlider: (
     const [bufferedRanges, setBufferedRanges] = useState<BufferedRange[]>([])
     const value = providedValue ?? uncontrolled ?? 0
     const wasPlayingRef = useRef(false)
+
+    useEffect(() => {
+      if (!media) return
+
+      const handleTimeUpdate = () => {
+        if (media.paused && !providedValue) {
+          setUncontrolled(media.currentTime * MS_PER_SECOND)
+        }
+      }
+
+      // Add event listener for time updates
+      const videoElement = media as unknown as HTMLVideoElement
+      videoElement.addEventListener("timeupdate", handleTimeUpdate)
+
+      // Cleanup
+      return () => {
+        videoElement.removeEventListener("timeupdate", handleTimeUpdate)
+      }
+    }, [media, providedValue])
 
     useFrame(() => {
       if (!media || !media.duration) return
