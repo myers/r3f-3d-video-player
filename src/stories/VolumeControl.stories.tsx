@@ -29,7 +29,9 @@ export const Default: Story = {
   render: (props) => {
     const video = useMemo(() => {
       const vid = document.createElement("video")
-      vid.src = "/example.mp4"
+      vid.src =
+        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+      vid.crossOrigin = "anonymous"
       vid.load()
       return vid
     }, [])
