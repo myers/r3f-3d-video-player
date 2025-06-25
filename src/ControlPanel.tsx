@@ -136,7 +136,7 @@ export const ControlPanel = ({ video, title }: ControlPanelProps) => {
               onClick={handleRewind}
             />
           </Container>
-          <Container cursor="pointer" onClick={handlePlayPause}>
+          <Container cursor="pointer">
             {paused ? (
               <Play
                 color="white"
