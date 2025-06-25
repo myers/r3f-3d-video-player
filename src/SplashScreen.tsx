@@ -23,6 +23,11 @@ const styles = {
     border: "none",
     borderRadius: "4px",
     cursor: "pointer",
+    "&:disabled": {
+      background: "#cccccc",
+      cursor: "not-allowed",
+      opacity: 0.7,
+    },
   },
 }
 
@@ -58,7 +63,19 @@ const EnterVRButton = ({ store }: { store: XRStore }) => {
   const isVRSupported = useXRSessionModeSupported("immersive-vr")
 
   if (!isVRSupported) {
-    return <div>VR not supported on this device</div>
+    return (
+      <button
+        disabled
+        style={{
+          ...styles.button,
+          background: "#cccccc",
+          cursor: "not-allowed",
+          opacity: 0.7,
+        }}
+      >
+        VR not supported on this device
+      </button>
+    )
   }
   return (
     <button onClick={() => store.enterVR()} style={styles.button}>

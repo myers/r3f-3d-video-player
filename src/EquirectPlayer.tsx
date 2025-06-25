@@ -1,47 +1,34 @@
 import { useFrame } from "@react-three/fiber"
-import { XRLayer, useXRInputSourceState, useXRStore } from "@react-three/xr"
-import { useMemo, useState, useEffect } from "react"
+import { XRLayer, useXRInputSourceState } from "@react-three/xr"
+import { useMemo, useState } from "react"
+import { ControlPanelRoot } from "./ControlPanel"
 
 interface EquirectPlayerProps {
+  title?: string
   videoUrl: string
   videoAngle?: number
   layout?: XRLayerLayout
 }
 
 export function EquirectPlayer({
+  title,
   videoUrl,
   videoAngle = 180,
   layout = "stereo-left-right",
 }: EquirectPlayerProps) {
-  const store = useXRStore()
   const [buttonADown, setButtonADown] = useState(false)
+  const [buttonBDown, setButtonBDown] = useState(false)
+  const [controlPanelVisible, setControlPanelVisible] = useState(true)
   const [moveRightDown, setMoveRightDown] = useState(false)
   const [moveLeftDown, setMoveLeftDown] = useState(false)
   const controllerRight = useXRInputSourceState("controller", "right")
-  const video = useMemo(() => {
+  const video: HTMLVideoElement = useMemo(() => {
     const videoElement = document.createElement("video")
     videoElement.src = videoUrl
     videoElement.crossOrigin = "anonymous"
     videoElement.preload = "auto"
     return videoElement
   }, [videoUrl])
-
-  useEffect(() => {
-    const handleProgress = () => {
-      if (video.buffered.length > 0) {
-        const bufferedEnd = video.buffered.end(video.buffered.length - 1)
-        const duration = video.duration
-        console.log(
-          `Video buffered: ${bufferedEnd.toFixed(1)}s / ${duration.toFixed(1)}s`,
-        )
-      }
-    }
-
-    video.addEventListener("progress", handleProgress)
-    return () => {
-      video.removeEventListener("progress", handleProgress)
-    }
-  }, [video])
 
   useFrame(() => {
     if (!controllerRight) {
@@ -71,10 +58,21 @@ export function EquirectPlayer({
       setMoveLeftDown(false)
     }
 
-    if (controllerRight?.gamepad?.["b-button"]?.state === "pressed") {
-      video.pause()
-      store.getState().session?.end()
+    // Handle B button for toggling control panel
+    if (
+      controllerRight?.gamepad?.["b-button"]?.state === "pressed" &&
+      !buttonBDown
+    ) {
+      setButtonBDown(true)
+      setControlPanelVisible((prev) => !prev)
     }
+    if (
+      controllerRight?.gamepad?.["b-button"]?.state !== "pressed" &&
+      buttonBDown
+    ) {
+      setButtonBDown(false)
+    }
+
     // Check if A button is pressed (button 0)
     if (
       controllerRight?.gamepad?.["a-button"]?.state === "pressed" &&
@@ -107,6 +105,7 @@ export function EquirectPlayer({
         lowerVerticalAngle={-Math.PI / 2.0}
         scale={100}
       />
+      {controlPanelVisible && <ControlPanelRoot video={video} title={title} />}
     </group>
   )
 }

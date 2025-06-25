@@ -70,6 +70,7 @@ export const VolumeControl: (
       height={24}
       {...props}
       ref={internalRef}
+      padding={5}
     >
       <Container
         cursor="pointer"

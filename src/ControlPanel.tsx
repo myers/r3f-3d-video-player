@@ -6,15 +6,25 @@ import { computed, signal } from "@preact/signals-core"
 import { useFrame } from "@react-three/fiber"
 import { Play, Pause, FastForward, Rewind } from "@react-three/uikit-lucide"
 
-export const ControlPanelRoot = () => {
+export type ControlPanelProps = {
+  video?: HTMLVideoElement
+  title?: string
+}
+
+export const ControlPanelRoot = (props: ControlPanelProps) => {
   return (
-    <group rotation={[-0.3, 0, 0]} scale={0.5}>
+    <group rotation={[-0.3, 0, 0]} position={[0, 0.35, 0]} scale={0.5}>
       <Root
-        backgroundColor="red"
-        sizeX={8}
-        sizeY={2}
+        backgroundColor="black"
+        padding={0}
+        margin={0}
+        borderRadius={10}
+        sizeX={5}
+        sizeY={1.5}
         flexDirection="row"
-      ></Root>
+      >
+        <ControlPanel {...props} />
+      </Root>
     </group>
   )
 }
@@ -26,13 +36,7 @@ function formatDuration(seconds: number) {
   return `${hour > 0 ? `${hour}:` : ""}${hour > 0 ? min.toString().padStart(2, "0") : min}:${sec.toString().padStart(2, "0")}`
 }
 
-export const ControlPanel = ({
-  video,
-  title,
-}: {
-  video?: HTMLVideoElement
-  title?: string
-}) => {
+export const ControlPanel = ({ video, title }: ControlPanelProps) => {
   const timeSignal = useMemo(() => signal(0), [])
   const durationSignal = useMemo(() => signal(0), [])
   const [paused, setPaused] = useState(true)
@@ -101,7 +105,7 @@ export const ControlPanel = ({
       margin={15}
     >
       {title && (
-        <Text fontSize={16} color="white" textAlign="center" fontWeight="bold">
+        <Text fontSize={16} color="white" textAlign="left" fontWeight="bold">
           {title}
         </Text>
       )}

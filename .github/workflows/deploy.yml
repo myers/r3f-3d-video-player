@@ -51,8 +51,21 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build
+      - name: Build App
         run: pnpm build
+
+      - name: Build Storybook
+        run: pnpm build-storybook
+
+      - name: Prepare deployment
+        run: |
+          # Create deployment directory
+          mkdir -p ./deploy
+          # Move main app build
+          mv dist/* ./deploy/
+          # Create storybook directory and move storybook build
+          mkdir -p ./deploy/storybook
+          mv storybook-static/* ./deploy/storybook/
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -60,7 +73,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: "./dist"
+          path: "./deploy"
 
       - name: Deploy to GitHub Pages
         id: deployment

@@ -43,8 +43,16 @@ export function App() {
           <li>
             Right thumbstick to the left fast forwards the video by 10 seconds
           </li>
-          <li>B button exits VR</li>
+          <li>B button toggles the control panel.</li>
         </ul>
+        <p>
+          If you browser doesn't support VR you can hit{" "}
+          <code>Window/Command + Alt/Option + E</code> to enable the iwer/devui
+          Emulator
+        </p>
+        <p>
+          <a href="storybook/">Storybook of components</a>
+        </p>
       </SplashScreen>
       <Canvas
         events={noEvents}
@@ -54,7 +62,11 @@ export function App() {
         <PointerEvents />
         <XR store={store}>
           <XROrigin position={[0, -0.5, 0.5]} />
-          <EquirectPlayer videoUrl={videoUrl} videoAngle={180} />
+          <EquirectPlayer
+            title="Sloths!"
+            videoUrl={videoUrl}
+            videoAngle={180}
+          />
         </XR>
       </Canvas>
     </>
