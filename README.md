@@ -1,54 +1,56 @@
-# React + TypeScript + Vite
+# 3D VR Video Player
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A VR-ready video player built with React Three Fiber and React XR, featuring an immersive 3D control panel. This project demonstrates how to create a VR video player with modern UI controls in a 3D space.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **VR Support**: Built for VR headsets like Meta Quest, with full controller support
+- **3D Control Panel**: Floating control panel with:
+  - Play/Pause button
+  - Volume control with mute toggle
+  - Video progress slider
+  - Fast forward/rewind buttons
+  - Title display
+- **Controller Integration**:
+  - A button: Play/Pause video
+  - B button: Toggle control panel
+  - Right thumbstick: Fast forward (right) / rewind (left) by 10 seconds
+- **360° Video Support**: Supports equirectangular video projection
+- **Modern UI**: Built with UIKit for React Three Fiber, providing a sleek and responsive interface
+- **Component Library**: Includes a Storybook showcase of all UI components
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Prerequisites
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+- Node.js (latest LTS version recommended)
+- pnpm (package manager)
+- A VR headset (tested on Meta Quest) or a modern browser with WebXR support
+
+### Installation
+
+```bash
+# Install dependencies
+pnpm install
+
+# Start the development server
+pnpm dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Development
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+# Run Storybook to view and develop components in isolation
+pnpm storybook
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+# Build for production
+pnpm build
 ```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is open source and available under the MIT license.

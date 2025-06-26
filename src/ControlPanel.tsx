@@ -13,7 +13,7 @@ export type ControlPanelProps = {
 
 export const ControlPanelRoot = (props: ControlPanelProps) => {
   return (
-    <group rotation={[-0.3, 0, 0]} position={[0, 0.35, 0]} scale={0.25}>
+    <group rotation={[-0.3, 0, 0]} position={[0, 0.35, -0.25]} scale={0.25}>
       <Root
         backgroundColor="black"
         padding={0}

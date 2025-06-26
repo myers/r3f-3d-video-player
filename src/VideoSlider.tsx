@@ -220,13 +220,13 @@ export const VideoSlider: (
           zIndexOffset={{ minor: 100 }}
           positionType="absolute"
           positionLeft={percentage}
-          transformTranslateX={-7}
-          transformTranslateY={-3}
+          transformTranslateX={-4}
+          transformTranslateY={-4}
           cursor="pointer"
-          height={14}
-          width={14}
+          height={16}
+          width={8}
           borderWidth={2}
-          borderRadius={1000}
+          borderRadius={4}
           borderColor={colors.primary}
           backgroundColor={colors.background}
         />

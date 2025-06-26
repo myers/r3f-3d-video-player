@@ -66,19 +66,13 @@ export const VolumeControl: (
     <Container
       flexDirection="row"
       alignItems="center"
-      gap={8}
+      gap={0}
       height={24}
       {...props}
       ref={internalRef}
       padding={5}
     >
-      <Container
-        cursor="pointer"
-        width={24}
-        height={24}
-        justifyContent="center"
-        alignItems="center"
-      >
+      <Container cursor="pointer" justifyContent="center" alignItems="center">
         {muted ? (
           <VolumeX color="white" width={24} height={24} onClick={toggleMute} />
         ) : (
@@ -92,6 +86,7 @@ export const VolumeControl: (
         step={0.01}
         value={volumeSignal}
         onValueChange={handleVolumeChange}
+        transformScale={0.7}
       />
     </Container>
   )
