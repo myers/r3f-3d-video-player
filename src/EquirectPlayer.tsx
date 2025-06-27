@@ -2,6 +2,7 @@ import { useFrame } from "@react-three/fiber"
 import { XRLayer, useXRInputSourceState } from "@react-three/xr"
 import { useMemo, useState } from "react"
 import { ControlPanelRoot } from "./ControlPanel"
+import { ActionIndicator } from "./ActionIndicator"
 
 interface EquirectPlayerProps {
   title?: string
@@ -105,6 +106,9 @@ export function EquirectPlayer({
         lowerVerticalAngle={-Math.PI / 2.0}
         scale={100}
       />
+      <group position={[0, 1, -1]}>
+        <ActionIndicator video={video} />
+      </group>
       {controlPanelVisible && <ControlPanelRoot video={video} title={title} />}
     </group>
   )

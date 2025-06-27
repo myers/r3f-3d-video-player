@@ -1,4 +1,4 @@
-import { Root, type RootRef } from "@react-three/uikit"
+import { DefaultProperties, Root, type RootRef } from "@react-three/uikit"
 import { Pause, Play, FastForward, Rewind } from "@react-three/uikit-lucide"
 import { useRef, useMemo } from "react"
 import { useSpring } from "@react-spring/web"
@@ -23,12 +23,12 @@ export const IconFlash = ({
   name = "play",
 }: IconFlashProps) => {
   const rootRef = useRef<RootRef>(null)
+  const initalScale = 1
   const iconOpacity = useMemo(() => signal(1), [])
 
-  const initalScale = 3
   useSpring({
     pause: disabled,
-    from: { opacity: 1, scale: initalScale },
+    from: { opacity: 0.9, scale: initalScale },
     to: { opacity: 0, scale: initalScale * 2 },
     config: (key) => {
       if (key === "opacity") {
@@ -49,7 +49,6 @@ export const IconFlash = ({
       iconOpacity.value = opacity
       rootRef.current.setStyle({
         transformScale: scale,
-        backgroundOpacity: opacity,
       })
     },
   })
@@ -57,17 +56,18 @@ export const IconFlash = ({
   console.log("iconOpacity1", iconOpacity.value)
   const Icon = ICONS[name]
   return (
-    <Root
-      ref={rootRef}
-      borderRadius={50}
-      backgroundColor="black"
-      padding={10}
-      justifyContent="center"
-      alignItems="center"
-      transformScale={initalScale}
-      backgroundOpacity={1}
-    >
-      <Icon opacity={iconOpacity} color="white" />
-    </Root>
+    <DefaultProperties backgroundOpacity={iconOpacity} opacity={iconOpacity}>
+      <Root
+        ref={rootRef}
+        borderRadius={50}
+        backgroundColor="black"
+        padding={10}
+        justifyContent="center"
+        alignItems="center"
+        transformScale={initalScale}
+      >
+        <Icon color="white" />
+      </Root>
+    </DefaultProperties>
   )
 }
